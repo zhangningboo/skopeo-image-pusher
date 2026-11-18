@@ -1,0 +1,52 @@
+name: Mirror container images to Aliyun ACR
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_image:
+        description: 'Optional source image (e.g. docker.io/library/redis:7.4)'
+        required: false
+        type: string
+      target_image:
+        description: 'Optional destination repository:tag (e.g. redis:7.4)'
+        required: false
+        type: string
+  push:
+    branches: [main]
+    paths:
+      - images.txt
+      - scripts/sync.py
+      - .github/workflows/sync.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: image-sync-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  mirror:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install skopeo
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends skopeo
+          skopeo --version
+
+      - name: Sync images to ACR
+        env:
+          ALIYUN_REGISTRY: ${{ secrets.ALIYUN_REGISTRY }}
+          ALIYUN_NAME_SPACE: ${{ secrets.ALIYUN_NAME_SPACE }}
+          ALIYUN_REGISTRY_USER: ${{ secrets.ALIYUN_REGISTRY_USER }}
+          ALIYUN_REGISTRY_PASSWORD: ${{ secrets.ALIYUN_REGISTRY_PASSWORD }}
+          DOCKERHUB_USER: ${{ secrets.DOCKERHUB_USER }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+          SOURCE_IMAGE: ${{ inputs.source_image }}
+          TARGET_IMAGE: ${{ inputs.target_image }}
+        run: python3 scripts/sync.py

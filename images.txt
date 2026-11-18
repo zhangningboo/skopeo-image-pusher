@@ -1,0 +1,6 @@
+# Source image                            Target repository:tag in your Aliyun ACR namespace
+# Create each destination repository in ACR before running the workflow.
+docker.io/library/alpine:3.20             alpine:3.20
+# docker.io/library/redis:7.4             redis:7.4
+# ghcr.io/owner/project:v1.0              owner-project:v1.0
+# registry.k8s.io/pause:3.10              pause:3.10
