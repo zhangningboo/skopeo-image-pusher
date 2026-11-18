@@ -1,1 +1,1 @@
-headscale/headscale:v0.29.5
+docker.io/headscale/headscale:v0.29.5 headscale:v0.29.5
